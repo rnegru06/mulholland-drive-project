@@ -1,0 +1,33 @@
+# ----- macOS / OS metadata -----
+.DS_Store
+
+# ----- Editor / IDE -----
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# ----- Python -----
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+
+# ----- Node (in case anyone bolts on a build step later) -----
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# ----- Claude tooling -----
+.claude/
+
+# ----- Large source media — regenerable and too large for git -----
+# The 490 MB film file. Bring your own legally-obtained copy to re-run extractors.
+Mulholland Drive Data/raw/mulholland_drive.mp4
+# 268 MB extracted audio — re-create with extract_audio.py
+Mulholland Drive Data/raw/mulholland_drive.wav
+# 591 MB of frame PNGs — re-create with ffmpeg from the .mp4
+Mulholland Drive Data/raw/frames/
