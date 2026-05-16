@@ -33,10 +33,8 @@ mulholland-drive-project/
 │                               NOTE: the .mp4, .wav, and frames/ folder are
 │                               gitignored (1.35 GB combined). Use ffmpeg to
 │                               regenerate frames + wav from your own legally
-│                               obtained copy of the film.
-│
-├── claude-design-prompt.md     Portable brief for spinning up new Claude sessions
-└── artifacts-starter.html      Single-file design sketchpad for Claude.ai Artifacts
+│                               obtained copy of the film. [copyright reasons]
+└──
 ```
 
 ## Running the site locally
@@ -89,7 +87,7 @@ python3 "Mulholland Drive Data/analysis/extract_colors.py" \
 
 ## Data sources
 
-- Scene-by-Scene Narrative Breakdown (uploaded analysis doc)
+- Scene-by-Scene Narrative Breakdown (uploaded analysis doc from the mulholland-drive.net website - all rights reserved to the creator)
 - Cinemetrics shot data: [Esselaar 2014](https://cinemetrics.uchicago.edu/movie/59ca9e2d-c6de-47c8-9e71-3287c9392d7a) (by plot line) · [Sonneveld 2009](https://cinemetrics.uchicago.edu/movie/476522f6-03a8-44b3-b8b5-32bcebc208e8) (by shot type)
 - OpenSubtitles SRT for timestamped dialogue
 - librosa audio analysis (silence, RMS energy, spectral centroid)
