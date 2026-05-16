@@ -1,0 +1,278 @@
+/* ===========================================================
+   Tweaks system — three expressive controls
+   1. Mood      → palette + ambience
+   2. Voice     → type pairing
+   3. Tempo     → vertical rhythm multiplier
+   =========================================================== */
+
+/* ---------- Tempo: scale the page's vertical breathing ---------- */
+:root { --tempo: 1; }
+.scrolly         { margin-top: calc(5rem * var(--tempo)); }
+.scrolly__steps  { padding: calc(25vh * var(--tempo)) 0 calc(50vh * var(--tempo)); }
+.step            { margin: 0 0 calc(50vh * var(--tempo)); padding: calc(1.5rem * var(--tempo)) 1.75rem; }
+.step:last-child { margin-bottom: calc(25vh * var(--tempo)); }
+.divider         { margin: calc(8rem * var(--tempo)) auto calc(3rem * var(--tempo)); }
+.twist           { padding: calc(6rem * var(--tempo)) var(--gutter); min-height: calc(100vh * var(--tempo)); }
+.conclusion      { margin: calc(8rem * var(--tempo)) auto 4rem; }
+.hero            { min-height: calc(100vh * var(--tempo)); }
+.hero__lede      { line-height: calc(1.55 + (var(--tempo) - 1) * 0.25); }
+
+/* ---------- Mood: Editorial (warm paper) ---------- */
+html[data-mood="editorial"] {
+  --bg-deep: #f1eadb;
+  --bg-paper: #e6decd;
+  --fg: #1a1812;
+  --fg-dim: #5b5440;
+  --fg-mute: #948a72;
+  --rule: rgba(26, 24, 18, 0.14);
+  --rule-strong: rgba(26, 24, 18, 0.32);
+  --dream-blue: #2c4a78;
+  --dream-blue-deep: #1a2c4a;
+  --reality-red: #861f1a;
+  --reality-red-deep: #4a0f0e;
+  --memory-gold: #8e5d1f;
+  --hollywood-pink: #b97a8c;
+}
+html[data-mood="editorial"] body { color: var(--fg); }
+html[data-mood="editorial"] body::before {
+  background:
+    radial-gradient(ellipse 90% 60% at 50% 0%, rgba(0, 0, 0, 0.05), transparent 70%),
+    radial-gradient(ellipse 100% 80% at 50% 100%, rgba(0, 0, 0, 0.06), transparent 60%);
+}
+html[data-mood="editorial"] #scrubber       { background: rgba(241, 234, 219, 0.92); border-bottom-color: var(--rule-strong); }
+html[data-mood="editorial"] .step           { background: rgba(255, 252, 245, 0.55); }
+html[data-mood="editorial"] .step.is-active { background: rgba(255, 252, 245, 0.95); }
+html[data-mood="editorial"] .twist__overlay { background: radial-gradient(circle at center, transparent 30%, var(--bg-deep) 80%); }
+html[data-mood="editorial"] .conclusion__hypothesis { background: rgba(255, 252, 245, 0.7); }
+html[data-mood="editorial"] .data-pill      { background: rgba(0,0,0,0.04); border-color: var(--rule); }
+html[data-mood="editorial"] #theme-sweep    { mix-blend-mode: multiply; }
+html[data-mood="editorial"] .scrubber__time,
+html[data-mood="editorial"] .scrubber__scene { color: var(--fg); }
+
+/* ---------- Mood: Noir (b/w, red survives) ---------- */
+html[data-mood="noir"] {
+  --bg-deep: #050505;
+  --bg-paper: #0e0e0e;
+  --fg: #f4f4f4;
+  --fg-dim: rgba(244, 244, 244, 0.58);
+  --fg-mute: rgba(244, 244, 244, 0.30);
+  --rule: rgba(255, 255, 255, 0.10);
+  --rule-strong: rgba(255, 255, 255, 0.28);
+  --dream-blue: #f4f4f4;
+  --dream-blue-deep: #aeaeae;
+  --reality-red: #e53832;
+  --reality-red-deep: #6d1a18;
+  --memory-gold: #f4f4f4;
+  --hollywood-pink: #d4d4d4;
+}
+html[data-mood="noir"] body::before {
+  background:
+    radial-gradient(ellipse 90% 60% at 50% 0%, rgba(229, 56, 50, 0.05), transparent 70%),
+    radial-gradient(ellipse 100% 80% at 50% 100%, rgba(0, 0, 0, 0.85), transparent 60%);
+}
+html[data-mood="noir"] .step           { background: rgba(255, 255, 255, 0.02); }
+html[data-mood="noir"] .step.is-active { background: rgba(255, 255, 255, 0.06); }
+html[data-mood="noir"] .data-pill      { background: rgba(255, 255, 255, 0.04); border-color: rgba(255, 255, 255, 0.18); }
+html[data-mood="noir"] #scrubber       { background: rgba(5, 5, 5, 0.92); }
+/* In Noir, the dominant accent collapses to red so the section themes don't compete */
+html[data-mood="noir"] body[data-world="dream"]    { --accent: var(--fg); --accent-deep: var(--fg-dim); --bg-tint: rgba(255,255,255,0.03); }
+html[data-mood="noir"] body[data-world="reality"]  { --accent: var(--reality-red); --accent-deep: var(--reality-red-deep); --bg-tint: rgba(229,56,50,0.07); }
+html[data-mood="noir"] body[data-world="memory"]   { --accent: var(--fg); --accent-deep: var(--fg-dim); --bg-tint: rgba(255,255,255,0.04); }
+html[data-mood="noir"] body[data-world="hollywood"]{ --accent: var(--fg); --accent-deep: var(--fg-dim); --bg-tint: rgba(255,255,255,0.04); }
+
+/* ---------- Voice: type pairings ---------- */
+html[data-voice="cinematic"] {
+  --serif: "Playfair Display", Georgia, "Times New Roman", serif;
+  --mono: "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+}
+html[data-voice="editorial"] {
+  --serif: "Spectral", "EB Garamond", Georgia, serif;
+  --mono: "Inter", "Helvetica Neue", system-ui, sans-serif;
+}
+html[data-voice="pulp"] {
+  --serif: "Bodoni Moda", "Didot", "Playfair Display", serif;
+  --mono: "Space Mono", "JetBrains Mono", monospace;
+}
+
+/* The body's inline `font-family: Arial` (a manual edit) overrides --serif at
+   the body level. Re-assert serif so Voice still drives copy. */
+html[data-voice] body { font-family: var(--serif); }
+
+/* Pulp wants tighter, more confident headlines */
+html[data-voice="pulp"] .hero__title,
+html[data-voice="pulp"] .divider__title,
+html[data-voice="pulp"] .conclusion__title,
+html[data-voice="pulp"] .step__title,
+html[data-voice="pulp"] .twist__quote {
+  font-weight: 800;
+  letter-spacing: -0.035em;
+}
+html[data-voice="pulp"] .hero__title { line-height: 0.96; }
+
+/* Editorial wants the body to soften */
+html[data-voice="editorial"] .hero__title,
+html[data-voice="editorial"] .divider__title,
+html[data-voice="editorial"] .conclusion__title { font-weight: 600; letter-spacing: -0.005em; }
+html[data-voice="editorial"] .hero__eyebrow,
+html[data-voice="editorial"] .divider__eyebrow,
+html[data-voice="editorial"] .step__time,
+html[data-voice="editorial"] .scrubber__phase { font-weight: 500; }
+
+/* ===========================================================
+   Tweaks panel chrome
+   =========================================================== */
+
+#tweaks-panel {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 10000;
+  width: 280px;
+  background: rgba(20, 22, 31, 0.96);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  color: #ece6d5;
+  font-family: "JetBrains Mono", "SF Mono", monospace;
+  padding: 0 0 8px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+  transition: opacity 220ms ease, transform 220ms ease;
+}
+#tweaks-panel[data-open="1"] {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+.tw-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+}
+.tw-title {
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: #ece6d5;
+  font-weight: 600;
+}
+.tw-close {
+  background: none;
+  border: 0;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+  font-family: inherit;
+}
+.tw-close:hover { color: #fff; }
+
+.tw-section { padding: 14px 14px 4px; }
+.tw-label {
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(236, 230, 213, 0.7);
+  margin: 0 0 9px;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-weight: 600;
+}
+.tw-hint {
+  color: rgba(236, 230, 213, 0.4);
+  letter-spacing: 0.04em;
+  text-transform: none;
+  font-family: "Playfair Display", Georgia, serif;
+  font-style: italic;
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.tw-segments {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 4px;
+}
+.tw-segments button {
+  font-family: inherit;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(236, 230, 213, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 3px;
+  padding: 8px 4px;
+  cursor: pointer;
+  transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
+}
+.tw-segments button:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+.tw-segments button.is-active {
+  background: #ece6d5;
+  color: #0a0d18;
+  border-color: #ece6d5;
+  font-weight: 600;
+}
+
+.tw-slider { display: grid; gap: 8px; }
+.tw-slider input[type="range"] {
+  width: 100%;
+  accent-color: #ece6d5;
+}
+.tw-slider__scale {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  color: rgba(236, 230, 213, 0.4);
+  letter-spacing: 0.1em;
+}
+.tw-slider__val {
+  font-size: 11px;
+  color: #ece6d5;
+  text-align: right;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+.tw-foot {
+  padding: 6px 14px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.tw-preset {
+  font-family: inherit;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  background: none;
+  border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(236, 230, 213, 0.75);
+  border-radius: 99px;
+  padding: 5px 11px;
+  cursor: pointer;
+}
+.tw-preset:hover { color: #fff; border-color: rgba(255,255,255,0.3); }
+.tw-reset {
+  background: none;
+  border: 0;
+  color: rgba(236, 230, 213, 0.5);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: 4px 0;
+  font-family: inherit;
+}
+.tw-reset:hover { color: #fff; }

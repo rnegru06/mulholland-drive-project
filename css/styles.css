@@ -1,0 +1,752 @@
+/* ===========================================================
+   Mulholland Drive Scrollytelling — Stylesheet
+   ========================================================= */
+
+/* ----- Theme tokens (film-grounded palette) -----
+   Sampled from the film's signature scenes:
+   - Mulholland Drive at night (deep navy)
+   - The blue box / Club Silencio (cinematic blue)
+   - The red lampshade / Diane's apartment (oxblood)
+   - Jitterbug stage (warm gold)
+   - Betty's courtyard (pink-peach)
+   ========================================================= */
+:root {
+  /* Base palette */
+  --bg-deep: #0a0d18;
+  --bg-paper: #14161f;
+  --fg: #ece6d5;
+  --fg-dim: #8a8275;
+  --fg-mute: #5a5444;
+  --rule: rgba(236, 230, 213, 0.10);
+  --rule-strong: rgba(236, 230, 213, 0.22);
+
+  /* Film accents */
+  --dream-blue: #3b5fa4;
+  --dream-blue-deep: #1c2a4e;
+  --reality-red: #9b2926;
+  --reality-red-deep: #4a0f0e;
+  --memory-gold: #d4a155;
+  --hollywood-pink: #dba8b9;
+  --silencio-cyan: #4f8fb0;
+
+  /* Themed (re-pointed when data-world changes) */
+  --bg: var(--bg-deep);
+  --bg-tint: rgba(59, 95, 164, 0.06);
+  --accent: var(--dream-blue);
+  --accent-deep: var(--dream-blue-deep);
+
+  /* Typography */
+  --serif: "Playfair Display", Georgia, "Times New Roman", serif;
+  --mono: "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+
+  /* Layout */
+  --max-w: 1280px;
+  --gutter: clamp(1rem, 4vw, 3rem);
+  --steps-w: min(34ch, 90vw);
+  --scrubber-h: 56px;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --theme-dur: 900ms;
+}
+
+body[data-world="dream"] {
+  --bg-tint: rgba(59, 95, 164, 0.07);
+  --accent: var(--dream-blue);
+  --accent-deep: var(--dream-blue-deep);
+}
+
+body[data-world="reality"] {
+  --bg-tint: rgba(155, 41, 38, 0.09);
+  --accent: var(--reality-red);
+  --accent-deep: var(--reality-red-deep);
+}
+
+body[data-world="memory"] {
+  --bg-tint: rgba(212, 161, 85, 0.07);
+  --accent: var(--memory-gold);
+  --accent-deep: #6a4f29;
+}
+
+body[data-world="hollywood"] {
+  --bg-tint: rgba(219, 168, 185, 0.06);
+  --accent: var(--hollywood-pink);
+  --accent-deep: #6e4f5a;
+}
+
+/* ----- Reset ----- */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+img, svg { display: block; max-width: 100%; }
+button { font: inherit; }
+a { color: var(--accent); text-decoration: none; }
+
+/* ----- Body shell ----- */
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: clamp(1rem, 0.95rem + 0.2vw, 1.125rem);
+  line-height: 1.6;
+  overflow-x: hidden;
+  transition: background var(--theme-dur) var(--ease-out);
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 90% 60% at 50% 0%, var(--bg-tint), transparent 70%),
+    radial-gradient(ellipse 100% 80% at 50% 100%, rgba(0, 0, 0, 0.5), transparent 60%);
+  transition: background var(--theme-dur) var(--ease-out);
+}
+
+/* ----- Theme sweep overlay ----- */
+#theme-sweep {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 100vw;
+  pointer-events: none;
+  z-index: 9999;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.02) 35%,
+    var(--accent) 50%,
+    rgba(255, 255, 255, 0.02) 65%,
+    transparent 100%
+  );
+  opacity: 0;
+  transform: translateX(-100%);
+  mix-blend-mode: screen;
+}
+
+#theme-sweep.sweeping {
+  animation: sweep 1100ms var(--ease-in-out) forwards;
+}
+
+@keyframes sweep {
+  0%   { opacity: 0; transform: translateX(-100%); }
+  10%  { opacity: 0.5; }
+  50%  { opacity: 0.7; }
+  90%  { opacity: 0.35; }
+  100% { opacity: 0; transform: translateX(100%); }
+}
+
+/* ===========================================================
+   Sticky scrubber (film timestamp + scene)
+   ========================================================= */
+#scrubber {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--scrubber-h);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--gutter);
+  background: rgba(10, 13, 24, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--rule);
+  transform: translateY(-100%);
+  transition: transform 400ms var(--ease-out);
+}
+
+#scrubber[data-active="true"] {
+  transform: translateY(0);
+}
+
+.scrubber__time {
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  color: var(--fg);
+  white-space: nowrap;
+  margin-right: 1.5rem;
+  min-width: 8ch;
+}
+
+.scrubber__scene {
+  font-family: var(--serif);
+  font-size: 0.95rem;
+  font-style: italic;
+  color: var(--fg-dim);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.scrubber__phase {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  padding: 0.25em 0.7em;
+  border: 1px solid var(--accent);
+  border-radius: 2px;
+  margin-left: 1rem;
+  transition: color var(--theme-dur), border-color var(--theme-dur);
+}
+
+.scrubber__progress {
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  height: 2px;
+  background: var(--accent);
+  transition: width 250ms var(--ease-out), background var(--theme-dur);
+  width: 0;
+}
+
+/* ===========================================================
+   Hero
+   ========================================================= */
+.hero {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--gutter);
+}
+
+.hero__inner {
+  max-width: 64ch;
+  text-align: center;
+}
+
+.hero__eyebrow {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--fg-dim);
+  margin: 0 0 2rem;
+}
+
+.hero__title {
+  font-family: var(--serif);
+  font-weight: 800;
+  font-size: clamp(2.5rem, 6vw + 1rem, 6rem);
+  line-height: 1.05;
+  margin: 0 0 2rem;
+  letter-spacing: -0.02em;
+}
+
+.hero__title .accent {
+  color: var(--accent);
+  font-style: italic;
+  font-weight: 400;
+  transition: color var(--theme-dur) var(--ease-out);
+}
+
+.hero__lede {
+  font-size: clamp(1.05rem, 1vw + 0.8rem, 1.35rem);
+  color: var(--fg);
+  line-height: 1.55;
+  margin: 0 auto;
+  max-width: 56ch;
+}
+
+.data-pill {
+  font-family: var(--mono);
+  font-size: 0.85em;
+  background: var(--bg-tint);
+  border: 1px solid var(--rule);
+  padding: 0.05em 0.5em;
+  border-radius: 0.25em;
+  white-space: nowrap;
+}
+
+.hero__scroll-hint {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--fg-dim);
+  margin-top: 4rem;
+  animation: bob 2.4s var(--ease-in-out) infinite;
+}
+
+@keyframes bob {
+  0%, 100% { transform: translateY(0); opacity: 0.7; }
+  50%      { transform: translateY(0.4rem); opacity: 1; }
+}
+
+/* ===========================================================
+   Section dividers
+   ========================================================= */
+.divider {
+  position: relative;
+  z-index: 1;
+  max-width: var(--max-w);
+  margin: 8rem auto 3rem;
+  padding: 0 var(--gutter);
+  text-align: center;
+}
+
+.divider__eyebrow {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--fg-dim);
+  margin: 0 0 1rem;
+}
+
+.divider__title {
+  font-family: var(--serif);
+  font-weight: 800;
+  font-size: clamp(2rem, 4vw + 0.5rem, 3.5rem);
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  margin: 0 0 1.5rem;
+  color: var(--fg);
+}
+
+.divider__title em {
+  color: var(--accent);
+  font-style: italic;
+  font-weight: 400;
+  transition: color var(--theme-dur);
+}
+
+.divider__lede {
+  font-size: 1.1rem;
+  max-width: 56ch;
+  margin: 0 auto;
+  color: var(--fg-dim);
+  line-height: 1.65;
+}
+
+/* ===========================================================
+   Scrollytelling sections — side-by-side layout
+   Pattern: viz on left (sticky), steps on right (scrolling)
+   ========================================================= */
+
+.scrolly {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: clamp(1.5rem, 4vw, 4rem);
+  max-width: var(--max-w);
+  margin: 5rem auto 0;
+  padding: 0 var(--gutter);
+  align-items: start;
+}
+
+.scrolly__sticky {
+  position: sticky;
+  top: var(--scrubber-h);
+  height: calc(100vh - var(--scrubber-h));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.scrolly__viz {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scrolly__caption {
+  position: absolute;
+  bottom: 1rem;
+  left: 0;
+  right: 0;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fg-dim);
+  text-align: center;
+  pointer-events: none;
+  min-height: 1.2em;
+}
+
+.scrolly__steps {
+  position: relative;
+  z-index: 2;
+  padding: 25vh 0 50vh;
+}
+
+.step {
+  width: 100%;
+  max-width: var(--steps-w);
+  margin: 0 0 50vh;
+  padding: 1.5rem 1.75rem;
+  border-left: 2px solid var(--rule);
+  background: rgba(20, 22, 31, 0.55);
+  border-radius: 0 4px 4px 0;
+  opacity: 0.45;
+  transition:
+    opacity 600ms var(--ease-out),
+    border-color var(--theme-dur),
+    background var(--theme-dur);
+}
+
+.step:last-child { margin-bottom: 25vh; }
+
+.step.is-active {
+  opacity: 1;
+  border-left-color: var(--accent);
+  background: rgba(20, 22, 31, 0.85);
+}
+
+.step__title {
+  font-family: var(--serif);
+  font-weight: 800;
+  font-size: clamp(1.4rem, 1vw + 1.1rem, 2rem);
+  letter-spacing: -0.01em;
+  margin: 0 0 0.75rem;
+  line-height: 1.15;
+}
+
+.step__time {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  font-weight: 400;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.4rem;
+  transition: color var(--theme-dur);
+}
+
+.step p {
+  margin: 0 0 0.7rem;
+  color: var(--fg);
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+.step strong {
+  color: var(--accent);
+  font-weight: 600;
+  transition: color var(--theme-dur);
+}
+
+.step em {
+  font-family: var(--serif);
+  font-style: italic;
+  color: var(--fg);
+}
+
+.step__quote {
+  margin: 0.75rem 0;
+  padding: 0.5rem 0 0.5rem 0.9rem;
+  border-left: 2px solid var(--accent);
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 1rem;
+  color: var(--fg);
+}
+
+/* ===========================================================
+   Visualizations — base styles per section
+   ========================================================= */
+
+.viz-placeholder {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fg-mute);
+  border: 1px dashed var(--rule);
+  padding: 4rem 2rem;
+  border-radius: 6px;
+  text-align: center;
+}
+
+/* Opening Hook — dual timeline */
+#viz-opening svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.timeline-track-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  fill: var(--fg-dim);
+}
+
+.scene-block {
+  transition: opacity 400ms var(--ease-out), transform 800ms var(--ease-out);
+}
+
+.scene-link {
+  fill: none;
+  stroke: var(--fg-mute);
+  stroke-width: 1;
+  stroke-opacity: 0.3;
+  transition: stroke-opacity 800ms var(--ease-out), stroke 800ms var(--ease-out);
+}
+
+/* Walkthrough timeline poster */
+.scene-poster {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+  position: relative;
+}
+
+.scene-poster__num {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.22em;
+  color: var(--fg-mute);
+  margin-bottom: 0.5rem;
+}
+
+.scene-poster__title {
+  font-family: var(--serif);
+  font-weight: 800;
+  font-size: clamp(2rem, 4vw + 0.5rem, 3.75rem);
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  margin: 0 0 1.5rem;
+  max-width: 18ch;
+  color: var(--fg);
+  transition: color var(--theme-dur);
+}
+
+.scene-poster__location {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0;
+  transition: color var(--theme-dur);
+}
+
+.scene-poster__chip {
+  display: inline-block;
+  margin-top: 1.25rem;
+  padding: 0.3em 0.9em;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--fg-dim);
+  border: 1px solid var(--rule-strong);
+  border-radius: 2px;
+}
+
+.scene-poster__bg {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.3;
+  background:
+    radial-gradient(circle at 30% 30%, var(--accent) 0%, transparent 50%),
+    radial-gradient(circle at 70% 70%, var(--accent-deep) 0%, transparent 60%);
+  filter: blur(40px);
+  transition: background var(--theme-dur);
+}
+
+/* Plot twist (the break) — full bleed */
+.twist {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 6rem var(--gutter);
+  overflow: hidden;
+}
+
+.twist__overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at center, transparent 30%, var(--bg-deep) 80%);
+}
+
+.twist__inner {
+  position: relative;
+  max-width: 50ch;
+}
+
+.twist__eyebrow {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 1.5rem;
+  transition: color var(--theme-dur);
+}
+
+.twist__quote {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-style: italic;
+  font-size: clamp(1.8rem, 4vw + 0.5rem, 3.5rem);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  margin: 0 0 2rem;
+}
+
+.twist__lede {
+  font-size: 1.1rem;
+  color: var(--fg-dim);
+  line-height: 1.6;
+}
+
+.twist--break {
+  animation: glitch-frame 0.4s steps(2) 1 1.2s;
+}
+
+@keyframes glitch-frame {
+  0%, 100% { transform: none; filter: none; }
+  20%      { transform: translateX(-3px); filter: hue-rotate(15deg); }
+  40%      { transform: translateX(3px); filter: hue-rotate(-15deg); }
+  60%      { transform: translateY(-2px); filter: contrast(1.4); }
+  80%      { transform: translateY(2px); filter: contrast(0.9); }
+}
+
+/* ===========================================================
+   Conclusion
+   ========================================================= */
+
+.conclusion {
+  position: relative;
+  z-index: 1;
+  max-width: 70ch;
+  margin: 8rem auto 4rem;
+  padding: 0 var(--gutter);
+}
+
+.conclusion__eyebrow {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--fg-dim);
+  margin: 0 0 1rem;
+}
+
+.conclusion__title {
+  font-family: var(--serif);
+  font-weight: 800;
+  font-size: clamp(2rem, 4vw + 0.5rem, 3rem);
+  line-height: 1.15;
+  margin: 0 0 2rem;
+}
+
+.conclusion__title em {
+  font-style: italic;
+  color: var(--accent);
+  font-weight: 400;
+}
+
+.conclusion p {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  margin: 0 0 1.25rem;
+  color: var(--fg);
+}
+
+.conclusion h3 {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 2.5rem 0 0.75rem;
+  transition: color var(--theme-dur);
+}
+
+.conclusion__hypothesis {
+  margin-top: 3rem;
+  padding: 2rem;
+  border: 1px solid var(--rule-strong);
+  border-left: 3px solid var(--accent);
+  border-radius: 4px;
+  background: rgba(20, 22, 31, 0.55);
+}
+
+/* ===========================================================
+   Footer
+   ========================================================= */
+
+.footer {
+  position: relative;
+  z-index: 1;
+  margin-top: 6rem;
+  padding: 3rem var(--gutter) 4rem;
+  border-top: 1px solid var(--rule);
+  text-align: center;
+}
+
+.footer__sources,
+.footer__credit {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  color: var(--fg-mute);
+  max-width: 70ch;
+  margin: 0.4rem auto;
+  line-height: 1.7;
+}
+
+.footer__credit {
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+}
+
+/* ===========================================================
+   Reduced motion + small screens
+   ========================================================= */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .scrolly {
+    grid-template-columns: 1fr;
+  }
+  .scrolly__sticky {
+    height: 60vh;
+    top: var(--scrubber-h);
+  }
+  .scrolly__steps {
+    padding: 4vh 0 30vh;
+  }
+  .step { margin-bottom: 30vh; }
+}
