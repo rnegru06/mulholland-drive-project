@@ -20,7 +20,6 @@ mulholland-drive-project/
 │   └── data/viz_data.json      Bundled dataset the frontend fetches at load
 │
 ├── Mulholland Drive Data/      Data pipeline (extractors + intermediate CSVs)
-│   ├── ROADMAP.md              Step-by-step plan that produced the bundle
 │   ├── analysis/               Python scripts:
 │   │                             extract_colors.py — OpenCV K-means on frames
 │   │                             extract_audio.py — ffmpeg + librosa
@@ -36,21 +35,6 @@ mulholland-drive-project/
 │                               obtained copy of the film. [copyright reasons]
 └──
 ```
-
-## Running the site locally
-
-The site is plain HTML/CSS/JS — no build step. Start a local web server from
-the `website/` folder:
-
-```bash
-cd website
-python3 -m http.server 8765 --bind 127.0.0.1
-```
-
-Then open http://127.0.0.1:8765 in a browser.
-
-You can also point GitHub Pages at the `website/` subfolder and it will
-deploy as-is. The frontend fetches `data/viz_data.json` relative to itself.
 
 ## Regenerating the data bundle
 
